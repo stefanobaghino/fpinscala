@@ -62,7 +62,12 @@ object List { // `List` companion object. Contains functions for creating and wo
       case Cons(_, tail) => Cons(h, tail)
     }
 
-  def drop[A](l: List[A], n: Int): List[A] = ???
+  def drop[A](l: List[A], n: Int): List[A] = {
+    @annotation.tailrec
+    def go(as: List[A], m: Int): List[A] =
+      if (m <= 0) as else go(tail(as), m - 1)
+    go(l, n)
+  }
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ???
 
