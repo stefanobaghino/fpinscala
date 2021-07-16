@@ -65,7 +65,10 @@ object List { // `List` companion object. Contains functions for creating and wo
   def drop[A](l: List[A], n: Int): List[A] = {
     @annotation.tailrec
     def go(as: List[A], m: Int): List[A] =
-      if (m <= 0) as else go(tail(as), m - 1)
+      as match {
+        case Cons(_, tail) if m > 0 => go(tail, m - 1)
+        case _ => as
+      }
     go(l, n)
   }
 
