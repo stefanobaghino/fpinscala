@@ -36,7 +36,8 @@ trait Stream[+A] {
     case _ => Empty
   }
 
-  def forAll(p: A => Boolean): Boolean = ???
+  def forAll(p: A => Boolean): Boolean =
+    !exists(!p(_))
 
   def headOption: Option[A] = ???
 
