@@ -81,8 +81,8 @@ object State {
   def sequence[S, A](l: List[State[S, A]]): State[S, List[A]] =
     State {
       s =>
-        l.foldRight((List.empty[A], s)) {
-          case (state, (acc, s)) =>
+        l.foldLeft((List.empty[A], s)) {
+          case ((acc, s), state) =>
             val (a, next) = state.run(s)
             (a :: acc, next)
         }
