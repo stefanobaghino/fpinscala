@@ -89,7 +89,7 @@ trait Stream[+A] {
     })
 
   def hasSubsequence[A](s: Stream[A]): Boolean =
-    tails.foldRight(false)((t, r) => r || t.startsWith(s))
+    tails.exists(_.startsWith(s))
 
 }
 case object Empty extends Stream[Nothing]
