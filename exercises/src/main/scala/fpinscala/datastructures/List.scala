@@ -141,4 +141,10 @@ object List { // `List` companion object. Contains functions for creating and wo
   def flatMap[A,B](l: List[A])(f: A => List[B]): List[B] =
     foldRight(l, Nil : List[B])((a, bs) => append(f(a), bs))
 
+  def zipAdd[A](l: List[Int], r: List[Int]): List[Int] =
+    (l, r) match {
+      case ((Cons(lh, lt), Cons(rh, rt))) => Cons(lh + rh, zipAdd(lt, rt))
+      case _ => Nil
+    }
+
 }
