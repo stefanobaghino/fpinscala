@@ -82,7 +82,23 @@ object List { // `List` companion object. Contains functions for creating and wo
     go(l)
   }
 
-  def init[A](l: List[A]): List[A] = ???
+  // not stack-safe
+  def init[A](l: List[A]): List[A] =
+    l match {
+      case Nil | Cons(_, Nil) => Nil
+      case Cons(h, t) => Cons(h, init(t))
+    }
+
+  // requires reversal
+  // def init[A](l: List[A]): List[A] = {
+  //   @annotation.tailrec
+  //   def go(as: List[A], acc: List[A]): List[A] =
+  //     as match {
+  //       case Nil | Cons(_, Nil) => acc
+  //       case Cons(h, t) => go(t, Cons(h, acc))
+  //     }
+  //   go(l, Nil)
+  // }
 
   def length[A](l: List[A]): Int = ???
 
