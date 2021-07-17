@@ -76,5 +76,10 @@ object Stream {
 
   def from(n: Int): Stream[Int] = cons(n, from(n + 1))
 
+  lazy val fibs: Stream[Int] = {
+    lazy val go: Stream[(Int, Int)] = cons((0, 1), go.map { case (a, b) => (b, a + b) })
+    go.map(_._1)
+  }
+
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
 }
