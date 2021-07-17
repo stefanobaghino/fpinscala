@@ -40,11 +40,23 @@ object RNG {
     (n.toDouble / Int.MaxValue, next)
   }
 
-  def intDouble(rng: RNG): ((Int,Double), RNG) = ???
+  def intDouble(rng: RNG): ((Int,Double), RNG) = {
+    val (n, rng1) = rng.nextInt
+    val (x, rng2) = RNG.double(rng1)
+    ((n, x), rng2)
+  }
 
-  def doubleInt(rng: RNG): ((Double,Int), RNG) = ???
+  def doubleInt(rng: RNG): ((Double,Int), RNG) = {
+    val (p, next) = RNG.intDouble(rng)
+    (p.swap, next)
+  }
 
-  def double3(rng: RNG): ((Double,Double,Double), RNG) = ???
+  def double3(rng: RNG): ((Double,Double,Double), RNG) = {
+    val (x, rng1) = RNG.double(rng)
+    val (y, rng2) = RNG.double(rng1)
+    val (z, rng3) = RNG.double(rng2)
+    ((x, y, z), rng3)
+  }
 
   def ints(count: Int)(rng: RNG): (List[Int], RNG) = ???
 
