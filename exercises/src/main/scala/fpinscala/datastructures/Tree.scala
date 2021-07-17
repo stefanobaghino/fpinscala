@@ -1,5 +1,7 @@
 package fpinscala.datastructures
 
+import annotation.tailrec
+
 sealed trait Tree[+A]
 case class Leaf[A](value: A) extends Tree[A]
 case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
@@ -11,6 +13,12 @@ object Tree {
     t match {
       case Leaf(_) => 1
       case Branch(l, r) => size(l) + size(r)
+    }
+
+  def max(t: Tree[Int]): Int =
+    t match {
+      case Leaf(n) => n
+      case Branch(l, r) => max(l).max(max(r))
     }
 
 }
