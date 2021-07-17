@@ -36,7 +36,7 @@ object RNG {
   }
 
   def double(rng: RNG): (Double, RNG) =
-    RNG.map(_.nextInt)(_.toDouble / Int.MaxValue)(rng)
+    RNG.map(nonNegativeInt)(_.toDouble / Int.MaxValue)(rng)
 
   def both[A, B](ra: Rand[A], rb: Rand[B]): Rand[(A, B)] =
     map2(ra, rb)((_, _))
