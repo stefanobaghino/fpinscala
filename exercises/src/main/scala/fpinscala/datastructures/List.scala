@@ -150,4 +150,17 @@ object List { // `List` companion object. Contains functions for creating and wo
       case _ => Nil
     }
 
+  def tails[A](l: List[A]): List[List[A]] = {
+    l match {
+      case Cons(_, t) => Cons(l, tails(t))
+      case Nil => Nil
+    }
+  }
+
+  def isSub[A](sup: List[A], sub: List[A]): Boolean =
+    foldRight(zipWith(sup, sub)(_ == _), true)(_ && _)
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean =
+    foldRight(tails(sup), false)((t, r) => r || isSub(t, sub))
+
 }
