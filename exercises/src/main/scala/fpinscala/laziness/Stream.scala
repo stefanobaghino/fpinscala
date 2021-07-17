@@ -88,6 +88,9 @@ trait Stream[+A] {
         Some((tail, tail))
     })
 
+  def hasSubsequence[A](s: Stream[A]): Boolean =
+    tails.foldRight(false)((t, r) => r || t.startsWith(s))
+
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
