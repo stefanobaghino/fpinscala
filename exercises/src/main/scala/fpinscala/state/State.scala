@@ -54,14 +54,8 @@ object RNG {
     ((x, y, z), rng3)
   }
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
-    if (count <= 0) {
-      (Nil, rng)
-    } else {
-      val (head, rng1) = rng.nextInt
-      val (tail, rng2) = ints(count - 1)(rng1)
-      (head :: tail, rng2)
-    }
+  val ints: Int => Rand[List[Int]] =
+    count => sequence(List.fill(count)(int))
 
   def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
     rng => {
@@ -70,7 +64,12 @@ object RNG {
       (f(a, b), rng2)
     }
 
-  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    rng => fs.foldRight((List.empty[A], rng)) {
+      case (rand, (acc, rng)) =>
+        val (a, next) = rand(rng)
+        (a :: acc, next)
+    }
 
   def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ???
 }
