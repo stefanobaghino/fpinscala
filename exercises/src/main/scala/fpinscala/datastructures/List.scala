@@ -142,8 +142,11 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldRight(l, Nil : List[B])((a, bs) => append(f(a), bs))
 
   def zipAdd[A](l: List[Int], r: List[Int]): List[Int] =
+    zipWith(l, r)(_ + _)
+
+  def zipWith[A, B](l: List[A], r: List[A])(f: (A, A) => B): List[B] =
     (l, r) match {
-      case ((Cons(lh, lt), Cons(rh, rt))) => Cons(lh + rh, zipAdd(lt, rt))
+      case ((Cons(lh, lt), Cons(rh, rt))) => Cons(f(lh, rh), zipWith(lt, rt)(f))
       case _ => Nil
     }
 
