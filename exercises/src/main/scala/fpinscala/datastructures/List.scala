@@ -102,7 +102,16 @@ object List { // `List` companion object. Contains functions for creating and wo
 
   def length[A](l: List[A]): Int = foldRight(l, 0)((_, l) => l + 1)
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = ???
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    @annotation.tailrec
+    def go(as: List[A], acc: B): B = {
+      as match {
+        case Nil => acc
+        case Cons(h, t) => go(t, f(acc, h))
+      }
+    }
+    go(l, z)
+  }
 
   def map[A,B](l: List[A])(f: A => B): List[B] = ???
 }
