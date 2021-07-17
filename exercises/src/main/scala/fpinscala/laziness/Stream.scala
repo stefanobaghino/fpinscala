@@ -21,10 +21,11 @@ trait Stream[+A] {
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
 
-  def take(n: Int): Stream[A] = this match {
-    case Cons(h, t) if n > 0 => Cons(h, () => t().take(n - 1))
-    case _ => Empty
-  }
+  def take(n: Int): Stream[A] =
+    unfold((this, n)) {
+      case (Cons(h, t), countdown) if countdown > 0 => Some((h(), (t(), countdown - 1))) 
+      case _ => None
+    }
 
   def drop(n: Int): Stream[A] = this match {
     case Cons(_, t) if n > 0 => t().drop(n - 1)
@@ -32,7 +33,13 @@ trait Stream[+A] {
   }
 
   def takeWhile(p: A => Boolean): Stream[A] =
-    foldRight(Stream.empty[A])((a, as) => if (p(a)) Stream.cons(a, as) else Stream.empty)
+    unfold(this)  {
+      case Cons(h, t) =>
+        lazy val head = h()
+        if (p(head)) Some((head, t())) else None
+      case _ =>
+        None
+    }
 
   def forAll(p: A => Boolean): Boolean =
     !exists(!p(_))
@@ -41,7 +48,10 @@ trait Stream[+A] {
     foldRight(Option.empty[A])((a, _) => Some(a))
 
   def map[B](f: A => B): Stream[B] =
-    foldRight(Stream.empty[B])((a, bs) => Stream.cons(f(a), bs))
+    unfold(this) {
+      case Empty => None
+      case Cons(h, t) => Some((f(h()), t()))
+    }
 
   def filter(p: A => Boolean): Stream[A] =
     foldRight(Stream.empty[A])((a, as) => if (p(a)) Stream.cons(a, as) else as)
@@ -51,6 +61,20 @@ trait Stream[+A] {
 
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldRight(Stream.empty[B])((a, bs) => f(a).append(bs))
+
+  def zipWith[B, C](that: Stream[B])(f: (A, B) => C): Stream[C] =
+    unfold((this, that)) {
+      case (Cons(lh, lt), Cons(rh, rt)) => Some((f(lh(), rh()), (lt(), rt())))
+      case _ => None
+    }
+
+  def zipAll[B](that: Stream[B]): Stream[(Option[A], Option[B])] =
+    unfold((this, that)) {
+      case (Cons(lh, lt), Cons(rh, rt)) => Some(((Some(lh()), Some(rh())), (lt(), rt())))
+      case (Empty, Cons(rh, rt)) => Some(((None, Some(rh())), (Empty, rt())))
+      case (Cons(lh, lt), Empty) => Some(((Some(lh()), None), (lt(), Empty)))
+      case _ => None
+    }
 
   def startsWith[B](s: Stream[B]): Boolean = ???
 }
