@@ -88,5 +88,28 @@ object State {
         }
     }
 
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+  def get[S]: State[S, S] = State(s => (s, s))
+
+  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+
+  def modify[S](f: S => S): State[S, Unit] = for {
+    s <- get
+    _ <- set(f(s))
+  } yield ()
+
+  def step(input: Input)(machine: Machine): Machine =
+    if (machine.candies > 0 && input == Coin && machine.locked) {
+        machine.copy(locked = false, coins = machine.coins + 1)
+    } else if (machine.candies > 0 && input == Turn && !machine.locked) {
+        machine.copy(locked = true, candies = machine.candies - 1)
+    } else {
+      machine
+    }
+
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] =
+    for {
+      _ <- sequence(inputs.map(input => modify(step(input))))
+      machine <- get
+    } yield (machine.candies, machine.coins)
+
 }
