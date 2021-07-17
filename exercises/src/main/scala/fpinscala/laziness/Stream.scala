@@ -37,7 +37,8 @@ trait Stream[+A] {
   def forAll(p: A => Boolean): Boolean =
     !exists(!p(_))
 
-  def headOption: Option[A] = ???
+  def headOption: Option[A] =
+    foldRight(Option.empty[A])((a, _) => Some(a))
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
