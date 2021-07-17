@@ -126,5 +126,13 @@ object List { // `List` companion object. Contains functions for creating and wo
       case Cons(h, t) => foldLeft(t, h)(append)
     }
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = ???
+  def incremented(ns: List[Int]): List[Int] =
+    map(ns)(_ + 1)
+
+  def doublesToString(xs: List[Double]): List[String] =
+    map(xs)(_.toString)
+
+  def map[A,B](l: List[A])(f: A => B): List[B] =
+    foldRight(l, Nil : List[B])((a, bs) => Cons(f(a), bs))
+
 }
