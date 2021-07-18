@@ -68,10 +68,11 @@ object Par {
   def delay[A](fa: => Par[A]): Par[A] = 
     es => fa(es)
 
+  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
+    es => choices(run(es)(n).get)(es)
+
   def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
-    es => 
-      if (run(es)(cond).get) t(es) // Notice we are blocking on the result of `cond`.
-      else f(es)
+    choiceN(map(cond)(if (_) 0 else 1))(List(t, f))
 
   /* Gives us infix syntax for `Par`. */
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)
