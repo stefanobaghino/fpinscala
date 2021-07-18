@@ -38,6 +38,9 @@ object Par {
   def map[A,B](pa: Par[A])(f: A => B): Par[B] = 
     map2(pa, unit(()))((a,_) => f(a))
 
+  def map3[A, B, C, D](pa: Par[A], pb: Par[B], pc: Par[C])(f: (A, B, C) => D): Par[D] =
+    map2(fork(map2(pa, pb)((a, b) => f(a, b, _))), fork(pc))((g, c) => g(c))
+
   def sortPar(parList: Par[List[Int]]) = map(parList)(_.sorted)
 
   def sequence[A](ps: List[Par[A]]): Par[List[A]] =
