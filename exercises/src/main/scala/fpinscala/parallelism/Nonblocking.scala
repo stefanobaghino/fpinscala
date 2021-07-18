@@ -106,6 +106,11 @@ object Nonblocking {
     def sequence[A](as: List[Par[A]]): Par[List[A]] =
       map(sequenceBalanced(as.toIndexedSeq))(_.toList)
 
+    def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] =
+      fork {
+        sequence(ps.map(asyncF(f)))
+      }
+
     // exercise answers
 
     /*
