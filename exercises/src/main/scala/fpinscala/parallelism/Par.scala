@@ -78,10 +78,13 @@ object Par {
     flatMap(key)(choices)
 
   def flatMap[A, B](a: Par[A])(f: A => Par[B]): Par[B] =
-    es => f(run(es)(a).get)(es)
+    join(map(a)(f))
 
   def join[A](pp: Par[Par[A]]): Par[A] =
-    flatMap(pp)(identity)
+    es => {
+      val p = run(es)(pp).get
+      p(es)
+    }
 
   /* Gives us infix syntax for `Par`. */
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)
