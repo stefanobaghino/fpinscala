@@ -40,6 +40,9 @@ object Par {
 
   def sortPar(parList: Par[List[Int]]) = map(parList)(_.sorted)
 
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] =
+    ps.foldRight(lazyUnit(List.empty[A]))(map2(_, _)(_ :: _))
+
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = 
     p(e).get == p2(e).get
 
