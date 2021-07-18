@@ -51,6 +51,14 @@ object Par {
   def parFilter[A](ps: List[A])(p: A => Boolean): Par[List[A]] =
     map(parMap(ps)(a => (a, p(a))))(_.collect { case (a, keep) if keep => a })
 
+  def parFold[A, B](ps: IndexedSeq[A], z: B)(m: A => B)(f: (B, B) => B): Par[B] =
+    if (ps.size <= 1) {
+      unit(ps.headOption.fold(z)(m))
+    } else {
+      val (l, r) = ps.splitAt(ps.length / 2)
+      map2(fork(parFold(l, z)(m)(f)), fork(parFold(r, z)(m)(f)))(f)
+    }
+
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = 
     p(e).get == p2(e).get
 
@@ -72,13 +80,19 @@ object Par {
 }
 
 object Examples {
+
   import Par._
-  def sum(ints: IndexedSeq[Int]): Int = // `IndexedSeq` is a superclass of random-access sequences like `Vector` in the standard library. Unlike lists, these sequences provide an efficient `splitAt` method for dividing them into two parts at a particular index.
-    if (ints.size <= 1)
-      ints.headOption getOrElse 0 // `headOption` is a method defined on all collections in Scala. We saw this function in chapter 3.
-    else { 
-      val (l,r) = ints.splitAt(ints.length/2) // Divide the sequence in half using the `splitAt` function.
-      sum(l) + sum(r) // Recursively sum both halves and add the results together.
-    }
+
+  def sum(ints: IndexedSeq[Int]): Par[Int] =
+    parFold(ints, 0)(identity)(_ + _)
+
+  def lift1[A, B](f: A => B): Option[A] => Option[B] = _.map(f)
+
+  def lift2[A, B, C](f: (A, B) => C): (Option[A], Option[B]) => Option[C] = (a, b) => a.flatMap(aa => b.map(f(aa, _)))
+
+  def none[A]: Option[A] = None
+
+  def max(ints: IndexedSeq[Int]): Par[Option[Int]] =
+    parFold(ints, none[Int])(Option(_))(lift2(math.max))
 
 }
