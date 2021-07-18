@@ -95,4 +95,7 @@ object Examples {
   def max(ints: IndexedSeq[Int]): Par[Option[Int]] =
     parFold(ints, none[Int])(Option(_))(lift2(math.max))
 
+  def wc(paragraphs: IndexedSeq[String]): Par[Int] =
+    parFold(paragraphs, 0)(_.length)(_ + _)
+
 }
