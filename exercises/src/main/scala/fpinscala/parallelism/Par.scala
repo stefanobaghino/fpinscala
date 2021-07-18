@@ -43,6 +43,14 @@ object Par {
   def sequence[A](ps: List[Par[A]]): Par[List[A]] =
     ps.foldRight(lazyUnit(List.empty[A]))(map2(_, _)(_ :: _))
 
+  def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] =
+    fork {
+      sequence(ps.map(asyncF(f)))
+    }
+
+  def parFilter[A](ps: List[A])(p: A => Boolean): Par[List[A]] =
+    map(parMap(ps)(a => (a, p(a))))(_.collect { case (a, keep) if keep => a })
+
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = 
     p(e).get == p2(e).get
 
